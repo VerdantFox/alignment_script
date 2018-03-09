@@ -1,4 +1,7 @@
+# https://openpyxl.readthedocs.io/en/stable/
 from openpyxl import load_workbook
+# https://xlsxwriter.readthedocs.io/
+import xlsxwriter
 import os
 import datetime
 
@@ -17,6 +20,7 @@ def get_file_count():
             file_count += 1
             header_list.append(filename.strip('.xlsx'))
 
+    print()
     print(f"file count is {file_count}")
     print(f"files working with:")
     print(header_list)
@@ -26,7 +30,7 @@ def get_file_count():
 
 
 def iterate_over_files(file_count):
-    """Reads through each excel file, sequences and their counts to dict"""
+    """Reads through each excel file, adds sequences and counts to dict"""
 
     column_counter = 0
     wb_dict = dict()
@@ -46,12 +50,10 @@ def iterate_over_files(file_count):
 
             # Open current workbook and go to its worksheet for reading
             current_file_path = os.path.join(directory_path, filename)
+            print(f"\n******* Opening {filename} *******")
             current_wb = load_workbook(current_file_path)
             current_ws = current_wb.active
-
-            print('***********************************************************')
-            print(f"working on {current_wb.sheetnames[0]}")
-            print('***********************************************************')
+            print(f"\n******** working on {current_wb.sheetnames[0]} ********")
 
             # Iterate through rows of current worksheet
             for row in current_ws.iter_rows(min_row=3, min_col=1, max_col=6):
@@ -82,12 +84,9 @@ def iterate_over_files(file_count):
 def write_to_workbook(wb_dict, header_list):
     """Writes a .xlsx excel workbook from the dictionary given and saves"""
 
-    # https://xlsxwriter.readthedocs.io/
-    import xlsxwriter
-
     # Get today's date for naming purposes
     today_date = datetime.datetime.date(datetime.datetime.now())
-    new_file_name = str(today_date) + "_joined_excel_data.xlsx"
+    new_file_name = str(today_date) + "_combined_matrix.xlsx"
 
     # Name excel workbook and excel worksheet
     workbook = xlsxwriter.Workbook(new_file_name)
@@ -97,7 +96,7 @@ def write_to_workbook(wb_dict, header_list):
     row = 0
     col = 0
 
-    print("\n ******* WRITING EXCEL WORKBOOK *********\n")
+    print("\n******* WRITING EXCEL WORKBOOK *********\n")
     # Add all headers to excel file
     worksheet.write(row, col, 'Motifs')
     col += 1
@@ -116,7 +115,7 @@ def write_to_workbook(wb_dict, header_list):
 
     # Close (and thus save) excel workbook
     workbook.close()
-    print("\n ************ FILE SAVED ***************\n")
+    print("\n************** FILE SAVED **************\n")
 
 
 if __name__ == '__main__':

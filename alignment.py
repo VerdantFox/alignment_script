@@ -1,107 +1,30 @@
-from openpyxl import Workbook, load_workbook
+from openpyxl import load_workbook
 import os
 import datetime
 
 
-def setup():
-    column_counter = 2
-    last_ws_row = 2
-
-    return column_counter, last_ws_row
-
-
-def mock_data(ws):
-    pass
-    # MOCK DATA for ws
-    # ws['A2'] = 'CAASNTDKLIF'
-    # ws['A3'] = 'CAAKAGGTSYGKLTF'
-    # ws['A4'] = 'CAASDSWGKLQF'
-    # ws['A5'] = 'CAANTNAGKSTF'
-    # ws['A6'] = 'CAASTGRRALTF'
-    # ws['D1'] = 'MNFAKER'
-    # ws['B2'] = 1
-    # ws['B3'] = 5
-    # ws['B4'] = 10
-    # ws['B5'] = 3
-    # ws['B6'] = 4
-
-
-# def old_slow_wb_update(current_ws, current_wb, last_ws_row):
-#     # Iterate through rows of current worksheet
-#     for row in current_ws.iter_rows(min_row=3, min_col=1, max_col=6):
-#         aa_seq = None
-#         aa_seq_count = None
-#         found_in_wb = False
-#
-#         for cell in row:
-#             if cell.column == 'A':
-#                 # Assign amino acid sequence variable for current row
-#                 aa_seq_count = cell.value
-#             elif cell.column == 'F':
-#                 # Assign sequence count variable for current row
-#                 aa_seq = cell.value
-#
-#         print(f'{aa_seq}: {aa_seq_count}')
-#
-#         # Iterate through rows of joined worksheet and update if found
-#         for ws_row in ws.iter_rows(
-#                 min_row=2, min_col=1, max_col=column_counter):
-#
-#             ws_aa_seq = ws_row[0].value
-#             if ws_aa_seq == aa_seq:
-#                 found_in_wb = True
-#                 print(f"match for {aa_seq} at {current_wb.sheetnames[0]}, "
-#                       f"{cell.column}{cell.row}")
-#
-#                 ws_row_value = ws_row[column_counter - 1].value
-#                 print(f'before: {ws_row_value}')
-#
-#                 print(f'adding aa_seq: {aa_seq_count}')
-#
-#                 if ws_row_value:
-#                     ws_row_value += aa_seq_count
-#                 else:
-#                     ws_row_value = aa_seq_count
-#
-#                 ws.cell(row=ws_row[0].row, column=column_counter,
-#                         value=ws_row_value)
-#
-#                 print(f'after: {ws_row_value}')
-#
-#             else:
-#                 pass
-#                 # print("HERE")
-#                 # if not ws[column_counter-1]:
-#                 #     ws.cell(row=ws_row[0].row, column=column_counter,
-#                 #             value=0)
-#
-#         if not found_in_wb:
-#             print("adding new row to wb...")
-#             ws.cell(row=last_ws_row, column=1, value=aa_seq)
-#             ws.cell(row=last_ws_row, column=column_counter,
-#                     value=aa_seq_count)
-#             last_ws_row += 1
-
-def create_dict():
-    wb_dict = dict()
-    return wb_dict
-
 def get_file_count():
+    header_list = []
     file_count = 0
     directory_path = os.path.dirname(os.path.realpath(__file__))
     for file in os.listdir(directory_path):
         filename = os.fsdecode(file)
+
         if filename.endswith(".xlsx") and not filename.startswith(
                 ('~', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9')):
             file_count += 1
+            header_list.append(filename.strip('.xlsx'))
 
-    return file_count
+    print(f"file count is {file_count}")
+    print(f"files working with:")
+    print(header_list)
+
+    return file_count, header_list
 
 
-def iterate_over_files(column_counter, last_ws_row):
-
-    file_count = get_file_count()
-    wb_dict = create_dict()
+def iterate_over_files(file_count):
+    column_counter = 0
+    wb_dict = dict()
 
     # https://stackoverflow.com/questions/10377998/how-can-i-iterate-over-files-in-a-given-directory
     # This gives the directory path from which the .py file is being run
@@ -115,7 +38,7 @@ def iterate_over_files(column_counter, last_ws_row):
             current_ws = current_wb.active
 
             print('***********************************************************')
-            print(current_wb.sheetnames[0])
+            print(f"working on {current_wb.sheetnames[0]}")
             print('***********************************************************')
 
             # # First sheet name in file will be the name of the header
@@ -126,7 +49,6 @@ def iterate_over_files(column_counter, last_ws_row):
             for row in current_ws.iter_rows(min_row=3, min_col=1, max_col=6):
                 aa_seq = None
                 aa_seq_count = None
-                found_in_wb = False
 
                 for cell in row:
                     if cell.column == 'A':
@@ -136,39 +58,64 @@ def iterate_over_files(column_counter, last_ws_row):
                         # Assign sequence count variable for current row
                         aa_seq = cell.value
 
-                print(f'{aa_seq}: {aa_seq_count}')
+                # print(f'{aa_seq}: {aa_seq_count}')
 
-                
+                # Add amino acid sequence to workbook and populate all columns 0
+                if aa_seq not in wb_dict:
+                    wb_dict[aa_seq] = [0 for x in range(file_count)]
 
+                # Add amino acid sequence count to current column of dict
+                wb_dict[aa_seq][column_counter] += aa_seq_count
 
-
+            # Move to next column
             column_counter += 1
-            continue
+            pass
         else:
-            continue
+            pass
+
+    return wb_dict
 
 
-def read_file():
-    pass
-
-
-def save_workbook():
-    # https://openpyxl.readthedocs.io/en/stable/tutorial.html#loading-from-a-file
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "combined_matrix"
-
-    ws['A1'] = 'Motifs'
+def write_to_workbook(wb_dict, header_list):
+    # https://xlsxwriter.readthedocs.io/
+    import xlsxwriter
 
     today_date = datetime.datetime.date(datetime.datetime.now())
-    new_file_name = str(today_date) + '_joined_excel_data.xlsx'
-    wb.save(new_file_name)
-    print("\n ******* FILE SAVED *********\n")
+    new_file_name = str(today_date) + "_joined_excel_data.xlsx"
+
+    workbook = xlsxwriter.Workbook(new_file_name)
+    worksheet = workbook.add_worksheet("combined_matrix")
+
+    # Start from the first cell. Rows and columns are zero indexed.
+    row = 0
+    col = 0
+
+    print("\n ******* WRITING EXCEL WORKBOOK *********\n")
+    # Add all headers to excel file
+    worksheet.write(row, col, 'Motifs')
+    col += 1
+    for header in header_list:
+        worksheet.write(row, col, header)
+        col += 1
+
+
+    # write dictionary to excel file
+    for aa_seq in wb_dict:
+        col = 0
+        row += 1
+        worksheet.write(row, col, aa_seq)
+        for aa_seq_count in wb_dict[aa_seq]:
+            col += 1
+            worksheet.write(row, col, aa_seq_count)
+
+    workbook.close()
+    print("\n ************ FILE SAVED ***************\n")
 
 
 if __name__ == '__main__':
-    column_counter, last_ws_row = setup()
 
-    iterate_over_files(column_counter, last_ws_row)
+    file_count, header_list = get_file_count()
 
-    # save_workbook()
+    wb_dict = iterate_over_files(file_count)
+
+    write_to_workbook(wb_dict, header_list)

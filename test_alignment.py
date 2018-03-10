@@ -85,17 +85,19 @@ def files():
 
     yield
 
-    today_date = datetime.datetime.date(datetime.datetime.now())
-    new_file_name = "1test_" + str(today_date) + "_combined_matrix.xlsx"
-
-    delete_files_list = ["text_file.txt", "~$temp_file.xlsx",
+    new_file_name, directory_path, current_file_path = directory_info()
+    delete_list = ["text_file.txt", "~$temp_file.xlsx",
                          "01-23-45_date1.xlsx", "2018-3-12_date2.xlsx",
                          "test_book_1.xlsx", "test_book_2.xlsx", new_file_name]
-    directory_path = os.path.dirname(os.path.realpath(__file__))
+    delete_files(delete_list)
+
+
+def delete_files(delete_list):
+    new_file_name, directory_path, current_file_path = directory_info()
     for file in os.listdir(directory_path):
         filename = os.fsdecode(file)
         current_file_path = os.path.join(directory_path, filename)
-        if filename in delete_files_list:
+        if filename in delete_list:
             os.remove(current_file_path)
 
 
@@ -110,6 +112,15 @@ def test_files_iterated_over():
     assert wb_dict == test_wb_dict1
 
 
+def directory_info():
+    directory_path = os.path.dirname(os.path.realpath(__file__))
+    today_date = datetime.datetime.date(datetime.datetime.now())
+    new_file_name = "1test_" + str(today_date) + "_combined_matrix.xlsx"
+    current_file_path = os.path.join(directory_path, new_file_name,)
+
+    return new_file_name, directory_path, current_file_path
+
+
 @pytest.mark.parametrize("test_input1, test_input2, exp_out1, exp_out2, exp_out3",
                          [
                              (test_wb_dict1, ['Motif', 'head1', 'head2'],
@@ -119,10 +130,8 @@ def test_files_iterated_over():
                          ])
 def test_write_to_workbook(test_input1, test_input2,
                            exp_out1, exp_out2, exp_out3):
-    directory_path = os.path.dirname(os.path.realpath(__file__))
-    today_date = datetime.datetime.date(datetime.datetime.now())
-    new_file_name = "1test_" + str(today_date) + "_combined_matrix.xlsx"
-    current_file_path = os.path.join(directory_path, new_file_name,)
+
+    new_file_name, directory_path, current_file_path = directory_info()
 
     alignment.write_to_workbook(test_input1, test_input2, is_test=True)
     assert new_file_name in os.listdir(directory_path)
@@ -133,6 +142,31 @@ def test_write_to_workbook(test_input1, test_input2,
     assert ws['A2'].value == exp_out1
     assert ws['C32'].value == exp_out2
     assert ws['U8'].value == exp_out3
+
+    delete_files([new_file_name])
+
+
+def test_alignment():
+    file_count, header_list = alignment.get_file_count()
+    wb_dict = alignment.iterate_over_files(file_count)
+    alignment.write_to_workbook(wb_dict, header_list, is_test=True)
+
+    new_file_name, directory_path, current_file_path = directory_info()
+    assert new_file_name in os.listdir(directory_path)
+
+    wb = openpyxl.load_workbook(current_file_path)
+    ws = wb.active
+
+    assert ws.title == "combined_matrix"
+
+    assert ws['A1'].value == 'Motifs'
+    assert ws['B1'].value == 'test_book_1'
+    assert ws['A2'].value == 'THE'
+    assert ws['A6'].value == 'CCCDDDEE'
+    assert ws['B6'].value == 5
+    assert ws['C32'].value == 82
+    assert ws['U8'].value is None
+
 
 
 if __name__ == '__main__':

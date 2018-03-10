@@ -81,12 +81,15 @@ def iterate_over_files(file_count):
     return wb_dict
 
 
-def write_to_workbook(wb_dict, header_list):
+def write_to_workbook(wb_dict, header_list, is_test=False):
     """Writes a .xlsx excel workbook from the dictionary given and saves"""
 
     # Get today's date for naming purposes
     today_date = datetime.datetime.date(datetime.datetime.now())
-    new_file_name = str(today_date) + "_combined_matrix.xlsx"
+    if is_test:
+        new_file_name = "1test_" + str(today_date) + "_combined_matrix.xlsx"
+    else:
+        new_file_name = str(today_date) + "_combined_matrix.xlsx"
 
     # Name excel workbook and excel worksheet
     workbook = xlsxwriter.Workbook(new_file_name)
@@ -115,6 +118,7 @@ def write_to_workbook(wb_dict, header_list):
 
     # Close (and thus save) excel workbook
     workbook.close()
+
     print("\n************** FILE SAVED **************\n")
 
 

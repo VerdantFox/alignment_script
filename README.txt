@@ -31,7 +31,7 @@ How run alignment script:
     venv\Script\activate.bat
 
     (change back-slashes to forward slashes if working on Mac)
-    You should notice a "(venv)"" before your address in the command
+    You should notice a "(venv)" before your address in the command
     prompt now. e.g.
 
     (venv) C:\Users\Yourname\Desktop\Twin_Alignment\alignment_script>

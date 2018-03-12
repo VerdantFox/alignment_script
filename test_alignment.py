@@ -7,7 +7,7 @@ import openpyxl
 # Appending current directory to path allows importing for 'pytest' command line
 sys.path.append('.')
 import alignment
-from test_data import test_wb_dict1, test_wb_dict2
+from TestData import test_wb_dict1, test_wb_dict2
 
 
 @pytest.fixture(scope="module")

@@ -44,11 +44,38 @@ How run alignment script:
 
     python alignment.py
 
-    This should lead to a series of messages explaining where the script
-    is at in the alignment process, ending in "****** FILE SAVED **********"
+    Hit enter. This should lead to a series of messages explaining
+    where the script is at in the alignment process,
+    ending in "****** FILE SAVED **********"
 
 9.) Your alignment file should now be found in your current folder. The file
     will be named "xxxx-xx-xx_combined_matrix" where the x's are today's date.
+
+
+
+How run combine_matrices script:
+
+
+1-6.)Follow alignment script (above) guide steps 1-6.
+
+7.) Remove all extra excel files (i.e. the files you used in "alignment"
+    to output a combined matrix excel file) from current folder.
+
+8.) Add all matrix excel files you would like to combine into a single matrix
+    into the current folder.
+
+9.) Into the command prompt type:
+
+    python combine_matrices.py
+
+    Hit enter. This should lead to a series of messages explaining
+    where the script is at in the process of combining files,
+    ending in "****** FILE SAVED **********".
+
+10.)Your alignment file should now be found in your current folder. The file
+    will be named "xxxx-xx-xx_multi_matrix.xlsx where the x's are today's date.
+
+
 
 Note: I don't think this will happen, but if while in (venv), after running
       "python alignment.py" you get an error message saying something like

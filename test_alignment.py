@@ -102,13 +102,15 @@ def delete_files(delete_list):
 
 
 def test_get_file_count(files):
-    file_count, header_list = alignment.get_file_count()
+    file_count, file_list, header_list = alignment.get_file_count()
     assert file_count == 2
     assert header_list == ['test_book_1', 'test_book_2']
+    assert file_list == ["test_book_1.xlsx", "test_book_2.xlsx"]
 
 
 def test_files_iterated_over():
-    wb_dict = alignment.iterate_over_files(2)
+    file_list = ["test_book_1.xlsx", "test_book_2.xlsx"]
+    wb_dict = alignment.iterate_over_files(2, file_list)
     assert wb_dict == test_wb_dict1
 
 
@@ -147,8 +149,8 @@ def test_write_to_workbook(test_input1, test_input2,
 
 
 def test_alignment():
-    file_count, header_list = alignment.get_file_count()
-    wb_dict = alignment.iterate_over_files(file_count)
+    file_count, file_list, header_list = alignment.get_file_count()
+    wb_dict = alignment.iterate_over_files(file_count, file_list)
     alignment.write_to_workbook(wb_dict, header_list, is_test=True)
 
     new_file_name, directory_path, current_file_path = directory_info()

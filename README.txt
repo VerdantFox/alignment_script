@@ -10,7 +10,7 @@ How run alignment script:
 
     cmd
 
-    The command prompt will open.
+    Hit enter. The command prompt will open.
 
 3.) Open the folder "alignment_script" in file explorer.
 
@@ -28,7 +28,7 @@ How run alignment script:
 6.) Activate the virtual environment (contains outside libraries needed
     for alignment script) by copy and pasting in the following line:
 
-    venv\Script\activate.bat
+    venv\Scripts\activate.bat
 
     (change back-slashes to forward slashes if working on Mac)
     You should notice a "(venv)" before your address in the command

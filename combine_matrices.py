@@ -31,7 +31,7 @@ def get_file_count():
 
 
 def get_current_wb_headers(ws, header_lists):
-    """Counts current workbook's headers and adds them to hear_list"""
+    """Counts current workbook's headers and adds them to header_list"""
 
     header_count = 0
     current_header_list = []

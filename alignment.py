@@ -12,12 +12,14 @@ def get_file_count():
     header_list = []
     file_list = []
     file_count = 0
+
+    # https://stackoverflow.com/questions/10377998/how-can-i-iterate-over-files-in-a-given-directory
+    # This gives the directory path from which the .py file is being run
     directory_path = os.path.dirname(os.path.realpath(__file__))
     for file in os.listdir(directory_path):
         filename = os.fsdecode(file)
-
-        if filename.endswith(".xlsx") and not filename.startswith(
-                ('~', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9')):
+        # Append not temporary (~) excel files to header_list
+        if filename.endswith(".xlsx") and not filename.startswith('~'):
             file_count += 1
             header_list.append(filename.strip('.xlsx'))
             file_list.append(filename)
@@ -28,18 +30,14 @@ def get_file_count():
     print(file_list)
     print()
 
-    return file_count, file_list, header_list
+    return file_count, file_list, header_list, directory_path
 
 
-def iterate_over_files(file_count, file_list):
+def iterate_over_files(file_count, file_list, directory_path):
     """Reads through each excel file, adds sequences and counts to dict"""
 
     column_counter = 0
     wb_dict = dict()
-
-    # https://stackoverflow.com/questions/10377998/how-can-i-iterate-over-files-in-a-given-directory
-    # This gives the directory path from which the .py file is being run
-    directory_path = os.path.dirname(os.path.realpath(__file__))
 
     # Iterate over each file in the current folder
     for filename in file_list:
@@ -119,8 +117,8 @@ def write_to_workbook(wb_dict, header_list, is_test=False):
 
 
 if __name__ == '__main__':
-    file_count, file_list, header_list = get_file_count()
+    file_count, file_list, header_list, directory_path = get_file_count()
 
-    wb_dict = iterate_over_files(file_count, file_list)
+    wb_dict = iterate_over_files(file_count, file_list, directory_path)
 
     write_to_workbook(wb_dict, header_list)

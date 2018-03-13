@@ -7,7 +7,7 @@ import openpyxl
 # Appending current directory to path allows importing for 'pytest' command line
 sys.path.append('.')
 import alignment
-from test_data import test_wb_dict1, test_wb_dict2
+from TestData import test_wb_dict1, test_wb_dict2
 
 
 @pytest.fixture(scope="module")
@@ -15,12 +15,8 @@ def files():
     # Bad empty files
     f1 = open("text_file.txt", "w+")
     f2 = open("~$temp_file.xlsx", "w+")
-    f3 = open("01-23-45_date1.xlsx", "w+")
-    f4 = open("2018-3-12_date2.xlsx", "w+")
     f1.close()
     f2.close()
-    f3.close()
-    f4.close()
 
     # Useful files
     row_1 = ['random_thing_top', 'HomoSapiens', 'c:/file/path/thing.gz']
@@ -102,13 +98,16 @@ def delete_files(delete_list):
 
 
 def test_get_file_count(files):
-    file_count, header_list = alignment.get_file_count()
+    file_count, file_list, header_list, directory_path = alignment.get_file_count()
     assert file_count == 2
     assert header_list == ['test_book_1', 'test_book_2']
+    assert file_list == ["test_book_1.xlsx", "test_book_2.xlsx"]
 
 
 def test_files_iterated_over():
-    wb_dict = alignment.iterate_over_files(2)
+    file_list = ["test_book_1.xlsx", "test_book_2.xlsx"]
+    directory_path = os.path.dirname(os.path.realpath(__file__))
+    wb_dict = alignment.iterate_over_files(2, file_list, directory_path)
     assert wb_dict == test_wb_dict1
 
 
@@ -147,8 +146,8 @@ def test_write_to_workbook(test_input1, test_input2,
 
 
 def test_alignment():
-    file_count, header_list = alignment.get_file_count()
-    wb_dict = alignment.iterate_over_files(file_count)
+    file_count, file_list, header_list, directory_path = alignment.get_file_count()
+    wb_dict = alignment.iterate_over_files(file_count, file_list, directory_path)
     alignment.write_to_workbook(wb_dict, header_list, is_test=True)
 
     new_file_name, directory_path, current_file_path = directory_info()

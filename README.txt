@@ -1,4 +1,4 @@
-How run alignment script:
+How to run alignment script:
 
 
 1.) If not already done so, install python (version 3.X) from

@@ -5,6 +5,7 @@
 import os
 import datetime
 import pandas as pd
+from functools import reduce
 
 
 def get_file_count():
@@ -60,53 +61,37 @@ def iterate_over_files(file_count, file_list, directory_path):
 
         df_list.append(sum_df)
 
-
-    print(df_list)
-    # return df_list
-
-
-def combine_data_frames(df_list):
-    pass
+    # print(df_list)
+    return df_list
 
 
+def combine_data_frames(dfs):
+    # http://notconfusing.com/joining-many-dataframes-at-once-in-pandas-n-ary-join/
+    def join_dfs(ldf, rdf):
+        return ldf.join(rdf, how='outer')
 
-def write_to_workbook(wb_dict, header_list, is_test=False):
+    # Combine data frames
+    final_df = reduce(join_dfs, dfs)
+    # Fill NaN values with 0
+    final_df.fillna(value=0, inplace=True)
+    # Sort columns high to low by workbook
+    final_df.sort_values([df.columns[0] for df in dfs], ascending=False,
+                         inplace=True)
+    # Convert float values to ints
+    final_df = final_df.astype(int)
+
+    return final_df
+
+
+def write_to_workbook(final_df):
     """Writes a .xlsx excel workbook from the dictionary given and saves"""
 
     # Get today's date for naming purposes
     today_date = datetime.datetime.date(datetime.datetime.now())
-    if is_test:
-        new_file_name = "1test_" + str(today_date) + "_combined_matrix.xlsx"
-    else:
-        new_file_name = str(today_date) + "_combined_matrix.xlsx"
+    file_name = str(today_date) + "_combined_matrix.xlsx"
+    sheet_name = "combined_matrix"
 
-    # Name excel workbook and excel worksheet
-    workbook = xlsxwriter.Workbook(new_file_name)
-    worksheet = workbook.add_worksheet("combined_matrix")
-
-    # Start from the first cell. Rows and columns are zero indexed.
-    row = 0
-    col = 0
-
-    print("\n******* WRITING EXCEL WORKBOOK *********\n")
-    # Add all headers to excel file
-    worksheet.write(row, col, 'Motifs')
-    col += 1
-    for header in header_list:
-        worksheet.write(row, col, header)
-        col += 1
-
-    # write dictionary to excel file
-    for aa_seq in wb_dict:
-        col = 0
-        row += 1
-        worksheet.write(row, col, aa_seq)
-        for aa_seq_count in wb_dict[aa_seq]:
-            col += 1
-            worksheet.write(row, col, aa_seq_count)
-
-    # Close (and thus save) excel workbook
-    workbook.close()
+    final_df.to_excel(file_name, sheet_name=sheet_name)
 
     print("\n************** FILE SAVED **************\n")
 
@@ -118,8 +103,6 @@ if __name__ == '__main__':
 
     df_list = iterate_over_files(file_count, file_list, directory_path)
 
-    blah = combine_data_frames(df_list)
+    final_df = combine_data_frames(df_list)
 
-    # print(wb_dict)
-    #
-    # write_to_workbook(wb_dict, header_list)
+    write_to_workbook(final_df)
